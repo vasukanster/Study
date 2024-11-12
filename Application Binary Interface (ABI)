@@ -1,0 +1,128 @@
+                                                                                  Application Binary Interface (ABI)
+What is an ABI (Application Binary Interface)?
+An Application Binary Interface (ABI) is a set of rules that define how different program components (like functions, libraries, and the operating system) communicate at the binary level. When software is compiled into machine code, the ABI specifies how the binary code should behave in terms of calling functions, passing arguments, managing memory, and handling system resources. It is the bridge between compiled application code and the underlying hardware or operating system.
+
+Key Aspects of an ABI
+1. Calling Conventions: For example, different ABIs may specify whether function arguments are passed in registers or pushed onto the stack.
+2. Data Types and Alignment: This ensures that the binary code understands how to read and write different types of data correctly, ensuring compatibility between different software components.
+3. System Call Interface: This allows applications to request services from the OS, such as file I/O, process management, and network communication.
+4. Register Usage: The ABI defines which CPU registers are used for passing arguments, holding return values, and saving the state of the program.
+5. Stack Management: For instance, the ABI might define that all functions must maintain a certain amount of stack space or use certain registers for managing the stack pointer.
+6. Exception Handling and Unwinding: Defines how exceptions (e.g., errors or signals) are handled, and how stack unwinding (clean-up after an exception) occurs. This ensures that exceptions don't corrupt memory or leave the program in an inconsistent state.
+7. Linking and Object File Format: The ABI may also define the format of object files and executable files (such as ELF, PE, or Mach-O), which the linker uses to combine object files into executables and manage library dependencies.
+
+Why is ABI Important?
+Portability: A consistent ABI allows programs to run on different machines or systems with minimal modification.
+Compatibility: Different compilers (e.g., GCC, Clang) or programming languages (C, C++, Rust) must adhere to the same ABI to allow interoperability. The ABI ensures that software built with one toolchain can work with libraries or other software built using another toolchain, as long as the same ABI is used.
+Optimization: The ABI influences performance optimizations, as compilers will take into account the layout of data, how functions are called, and how resources are managed to generate the most efficient code.
+
+Common ABIs
+Different platforms and operating systems have their own ABIs, which can vary in significant ways. Some well-known ABIs include:
+System V ABI (x86-64): A widely used ABI for 64-bit Linux and other UNIX-like operating systems on x86-64 architecture.
+Microsoft x64 ABI (Windows): The calling conventions for 64-bit applications on Windows.
+ARM ABI: The ABI used for ARM-based systems, which can vary between different ARM architectures (e.g., ARMv7, ARMv8).
+Itanium ABI: An older and now mostly obsolete ABI for Intel's Itanium architecture.
+WebAssembly ABI: Defines the interaction between WebAssembly (Wasm) and the host environment, such as the browser or server-side runtime.
+
+Example: ABI on x86-64 Linux (System V ABI)
+Let's take a look at the System V ABI for x86-64 as an example:
+Function Arguments: The first six integer arguments are passed via registers (RDI, RSI, RDX, RCX, R8, and R9). Additional arguments are passed on the stack.
+Return Values: The return value is placed in the RAX register.
+Stack Alignment: The stack must be aligned to 16 bytes before making a function call, and the function prologue/epilogue must preserve certain registers.
+Calling Convention: Functions are expected to follow a standard convention that enables interoperation with other functions or libraries that adhere to the same ABI.
+
+
+                                                                										ABI in Android
+
+In Android, the Application Binary Interface (ABI) plays a crucial role in ensuring compatibility between the compiled code of Android applications, the Android runtime (ART), and the underlying hardware architecture.
+
+Android Supported Architectures: Android supports several hardware architectures, and each architecture uses a different ABI. The most common ones include:
+ARM (32-bit and 64-bit):
+	ARM is the most widely used architecture in mobile devices.
+	ARMv7 (32-bit): Uses the armeabi ABI.
+	ARMv8 (64-bit): Uses the arm64-v8a ABI.
+x86 (32-bit and 64-bit):
+	Although less common in mobile devices, some Android devices use Intel processors.
+	x86: Uses the x86 ABI (32-bit).
+	x86_64: Uses the x86_64 ABI (64-bit).
+MIPS (less common):
+	Some older devices used MIPS processors, though they are now largely obsolete.
+	MIPS32 and MIPS64: Used the mips and mips64 ABIs, respectively.
+For example, a device that supports both 64-bit ARM and x86-64 will have separate ABIs for arm64-v8a and x86_64.
+
+The NDK and ABIs in Android:
+-> The Android NDK allows developers to write parts of an Android application in C or C++ for performance-critical operations.
+-> When you use the NDK to compile native code, you specify which ABIs to support, and the resulting APK can contain compiled code for multiple ABIs. This enables the APK to run on devices with different CPU architectures.
+-> Android provides a tool called ndk-build and more recently CMake to manage native code and its associated ABIs. The NDK automatically includes libraries for the supported ABIs.
+
+The Native ABI for Each Architecture:
+ARM 32-bit (armeabi-v7a): This ABI is used on older 32-bit ARM devices. It is based on the ARMv7 architecture and follows the ARM EABI (Embedded ABI).
+ARM 64-bit (arm64-v8a): This ABI is used on modern 64-bit ARM devices (like newer smartphones). It follows the AArch64 architecture and is based on the ARMv8 instruction set.
+x86 (x86): Used on devices with Intel processors. It follows the x86-32 ABI.
+x86 64-bit (x86_64): Similar to x86 but for 64-bit devices, it follows the x86-64 ABI.
+MIPS (mips, mips64): This was used in older Android devices but is now obsolete and no longer supported in recent versions of Android.
+
+Linking and Shared Libraries:
+-> Android uses shared libraries to manage system-level services and functionalities. These libraries (e.g., libc.so, libm.so, etc.) are compiled according to the platform's ABI and are included in the system image.
+-> When you write native code in Android (using NDK), your application can link to these shared libraries, and the ABI ensures that the compiled code can correctly call functions from these libraries.
+
+Multilib Support in APKs:
+-> When you build an Android application that includes native code (via the NDK), you can create a multi-architecture APK that contains binaries for different ABIs. This is known as multilib support.
+-> The APK can contain:
+	armeabi-v7a binaries for 32-bit ARM devices,
+	arm64-v8a binaries for 64-bit ARM devices,
+	x86 binaries for Intel-based devices, and
+	x86_64 binaries for 64-bit Intel devices.
+-> The Android build system (Gradle) allows you to specify which ABIs you want to support by using the abiFilters in the build.gradle file.
+-> Android ABI Example in Practice: For example, if you're targeting both ARM 32-bit and 64-bit devices, your build.gradle file might look something like this:
+		gradle:
+		android {
+			defaultConfig {
+				ndk {
+					abiFilters 'armeabi-v7a', 'arm64-v8a'
+				}
+			}
+		}
+-> Compiling for multiple ABIs: The NDK compiles your C/C++ code into separate binaries for each specified ABI. When you distribute your APK, it contains separate binaries for each ABI (like libfoo.so for armeabi-v7a and libfoo.so for arm64-v8a), and the Android system will load the appropriate library based on the device’s architecture.
+
+
+                                                                  									ABI in Yocto
+
+Yocto is a popular framework for building custom Linux distributions, often used in embedded systems. It provides a highly flexible and customizable environment where developers can define which components are included in the OS image and how they should interact. ABIs in Yocto help ensure that native code (typically written in C or C++) can interface correctly with the OS and hardware.
+
+How ABI is Used in Yocto-based OS
+Yocto and Cross-Compilation: Yocto is primarily used for cross-compilation. This means that software is often built on a host system (e.g., an x86 Linux machine) for a target architecture (e.g., ARM, x86, MIPS). Yocto uses the meta-toolchain and cross-compilers (e.g., arm-poky-linux-gnueabi-gcc, aarch64-poky-linux-gnu-gcc) to produce software that is compatible with the target device’s ABI.
+
+Target Architectures and ABIs: Yocto supports multiple architectures, and each architecture will use a different ABI. 
+For example:
+	ARM 32-bit (armv7): Uses the armv7 ABI (specifically armeabi or armeabi-v7a).
+	ARM 64-bit (aarch64): Uses the aarch64 ABI (arm64).
+	x86 32-bit: Uses the x86 ABI.
+	x86 64-bit: Uses the x86_64 ABI.
+	MIPS: For MIPS-based systems, the mips ABI is used (although MIPS is not common in most modern embedded systems).
+
+Yocto Recipes and ABIs: a recipe that builds a C or C++ application might include flags that specify the architecture (e.g., TARGET_ARCH = "arm") and the ABI, ensuring that the code is compiled in accordance with the ABI for the target architecture.
+
+Multi-Architecture and Multi-ABI Support: Yocto supports building software for multiple architectures and multiple ABIs at the same time.
+
+ABIs in Yocto Kernel and Libraries:
+-> Kernel: When building the kernel for an embedded system with Yocto, the ABI is defined by the architecture of the target device. The kernel interacts directly with hardware, and its ABI defines how system calls and interrupts are handled. The Yocto build system compiles the kernel based on the target architecture and ABI.
+-> Libraries: Yocto builds and packages system libraries (like glibc, libc, libstdc++, etc.) in accordance with the target ABI. If you're cross-compiling an application, it will be linked against the appropriate versions of these libraries for the specified ABI. For example, glibc provides the system call interface and runtime support for the applications, and it must be built for the correct target architecture and ABI.
+
+Yocto and Cross-Toolchain:
+-> Yocto generates a cross-toolchain that includes the necessary compilers, linkers, and other tools to build applications for the target ABI. These cross-tools are configured based on the target architecture and ABI. 
+-> For instance:
+	The arm-poky-linux-gnueabi-gcc compiler targets the armv7 ABI.
+	The aarch64-poky-linux-gnu-gcc compiler targets the aarch64 ABI.
+-> The Yocto-generated toolchain ensures that native applications are compiled correctly for the target ABI, whether it's ARM, x86, or other supported architectures.
+
+Multilib support: Yocto supports the creation of multilib packages, which means it can generate binaries for multiple ABIs (e.g., both 32-bit and 64-bit versions of the same software). This is often necessary when the target device supports both 32-bit and 64-bit architectures or when building for a heterogeneous system.
+
+Bitbake and ABI in Yocto:
+-> Bitbake is the build engine used by Yocto to process recipes and build images. When building a Yocto-based image, Bitbake automatically configures the build environment to target the specified architecture and ABI.
+-> For example, if you specify MACHINE = "qemuarm64", Yocto will build the image for the ARM 64-bit architecture (arm64) and ensure that the appropriate ABI (aarch64) is used during the build process.
+		# Set the target architecture and ABI
+		TARGET_ARCH = "arm"
+		TARGET_ABI = "armeabi-v7a"
+		Building for Multiple ABIs: You can use abiFilters in your local.conf file or the recipe to ensure that specific ABIs are targeted:
+		ABI = "armeabi-v7a arm64-v8a x86 x86_64"
