@@ -32,7 +32,7 @@ Stack Alignment: The stack must be aligned to 16 bytes before making a function 
 Calling Convention: Functions are expected to follow a standard convention that enables interoperation with other functions or libraries that adhere to the same ABI.
 
 
-                                                                										ABI in Android
+                                                                			ABI in Android
 
 In Android, the Application Binary Interface (ABI) plays a crucial role in ensuring compatibility between the compiled code of Android applications, the Android runtime (ART), and the underlying hardware architecture.
 
@@ -86,7 +86,7 @@ Multilib Support in APKs:
 -> Compiling for multiple ABIs: The NDK compiles your C/C++ code into separate binaries for each specified ABI. When you distribute your APK, it contains separate binaries for each ABI (like libfoo.so for armeabi-v7a and libfoo.so for arm64-v8a), and the Android system will load the appropriate library based on the device’s architecture.
 
 
-                                                                  									ABI in Yocto
+                                                                  			ABI in Yocto
 
 Yocto is a popular framework for building custom Linux distributions, often used in embedded systems. It provides a highly flexible and customizable environment where developers can define which components are included in the OS image and how they should interact. ABIs in Yocto help ensure that native code (typically written in C or C++) can interface correctly with the OS and hardware.
 
