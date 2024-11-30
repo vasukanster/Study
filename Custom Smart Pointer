@@ -1,0 +1,100 @@
+#include <iostream>
+
+template <typename T>
+class MyUniquePtr {
+private:
+    T* ptr;  // Raw pointer to the dynamically allocated object
+
+public:
+    // Constructor: takes ownership of the pointer
+    explicit MyUniquePtr(T* p = nullptr) : ptr(p) {}
+
+    // Destructor: ensures that the memory is freed when the smart pointer goes out of scope
+    ~MyUniquePtr() {
+        delete ptr;
+        std::cout << "Memory freed\n";
+    }
+
+    // Move Constructor: transfers ownership of the pointer
+    MyUniquePtr(MyUniquePtr&& other) noexcept : ptr(other.ptr) {
+        other.ptr = nullptr;  // Null out the other pointer to prevent double deletion
+        std::cout << "Move Constructor called\n";
+    }
+
+    // Move Assignment Operator: transfers ownership of the pointer
+    MyUniquePtr& operator=(MyUniquePtr&& other) noexcept {
+        if (this != &other) {
+            delete ptr;  // Release any currently owned memory
+            ptr = other.ptr;  // Take ownership of the other pointer
+            other.ptr = nullptr;  // Null out the other pointer
+            std::cout << "Move Assignment Operator called\n";
+        }
+        return *this;
+    }
+
+    // Delete Copy Constructor: prevents copying of the smart pointer
+    MyUniquePtr(const MyUniquePtr& other) = delete;
+
+    // Delete Copy Assignment Operator: prevents copying of the smart pointer
+    MyUniquePtr& operator=(const MyUniquePtr& other) = delete;
+
+    // Dereferencing operator (*)
+    T& operator*() const {
+        return *ptr;
+    }
+
+    // Arrow operator (->)
+    T* operator->() const {
+        return ptr;
+    }
+
+    // Get raw pointer (for access to underlying pointer)
+    T* get() const {
+        return ptr;
+    }
+
+    // Release ownership of the pointer (without deleting it)
+    T* release() {
+        T* temp = ptr;
+        ptr = nullptr;
+        return temp;
+    }
+
+    // Reset the smart pointer to a new object, deleting the old one
+    void reset(T* new_ptr = nullptr) {
+        delete ptr;
+        ptr = new_ptr;
+    }
+};
+
+class MyClass {
+public:
+    void say_hello() {
+        std::cout << "Hello, World!" << std::endl;
+    }
+};
+
+int main() {
+    // Create a MyUniquePtr to manage a dynamically allocated MyClass object
+    MyUniquePtr<MyClass> ptr1(new MyClass());
+
+    // Use the object via the smart pointer
+    ptr1->say_hello();
+    (*ptr1).say_hello();
+
+    // Move ownership to another MyUniquePtr (ptr2)
+    MyUniquePtr<MyClass> ptr2 = std::move(ptr1);
+    ptr2->say_hello();
+
+    // After the move, ptr1 should be null
+    if (ptr1.get() == nullptr) {
+        std::cout << "ptr1 is null after move\n";
+    }
+
+    // Reset ptr2 to a new object
+    ptr2.reset(new MyClass());
+    ptr2->say_hello();
+
+    // When ptr2 goes out of scope, the dynamically allocated MyClass will be deleted
+    return 0;
+}
